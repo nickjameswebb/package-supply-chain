@@ -1,0 +1,3 @@
+FROM ghcr.io/vmware-tanzu/carvel-docker-image:latest
+
+RUN apt-get update -qqy && apt-get install -qqy docker.io

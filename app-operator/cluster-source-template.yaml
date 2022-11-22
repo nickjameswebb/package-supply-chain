@@ -1,0 +1,22 @@
+# `source` instantiates a GitRepository object, responsible for keeping track
+# of commits made to a git repository, making them available as blobs to
+# further resources in the supply chain.
+---         
+apiVersion: carto.run/v1alpha1
+kind: ClusterSourceTemplate
+metadata:
+  name: flux-git-repository-source-template
+spec:
+  urlPath: .status.artifact.url
+  revisionPath: .status.artifact.revision
+  template:
+    apiVersion: source.toolkit.fluxcd.io/v1beta1
+    kind: GitRepository
+    metadata:
+      name: $(workload.metadata.name)$
+    spec:
+      interval: 10s
+      url: $(workload.spec.source.git.url)$
+      ref: $(workload.spec.source.git.ref)$
+      gitImplementation: libgit2
+      ignore: ""

@@ -1,0 +1,184 @@
+# Copyright 2021 VMware
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+apiVersion: tekton.dev/v1beta1
+kind: ClusterTask
+metadata:
+  name: git-writer
+spec:
+  description: |-
+    A task that writes a given set of files (provided as a json base64-encoded)
+    to git repository under a specific directory (`./config`).
+  params:
+    - name: git_repository
+      description: The repository path
+      type: string
+    - name: git_branch
+      description: The git branch to read and write
+      type: string
+      default: "main"
+    - name: git_user_email
+      description: User email address
+      type: string
+      default: "example@example.com"
+    - name: git_user_name
+      description: User name
+      type: string
+      default: "Example"
+    - name: git_commit_message
+      description: Message for the git commit
+      type: string
+      default: "New Commit"
+    - name: package_yaml
+      type: string
+      description: >
+        yaml string containing package.yaml definition
+  steps:
+    - name: git-clone-and-push
+      image: paketobuildpacks/build:base
+      securityContext:
+        runAsUser: 0
+      workingDir: /root
+      script: |
+        #!/usr/bin/env bash
+
+        set -o errexit
+        set -o xtrace
+
+        git clone $(params.git_repository) ./repo
+        cd repo
+
+        git checkout -b $(params.git_branch) || git checkout $(params.git_branch)
+        git pull --rebase origin $(params.git_branch) || true
+
+        git config user.email $(params.git_user_email)
+        git config user.name $(params.git_user_name)
+
+        mkdir -p packages && rm -rf packages/*
+        cd packages
+
+        package_version="$(echo '$(params.package_yaml)' | grep version | awk '{print $2}')"
+        echo '$(params.package_yaml)' > "${package_version}.yaml"
+        git add "${package_version}.yaml"
+        git commit -m "$(params.git_commit_message)"
+        git push origin $(params.git_branch)
+---
+apiVersion: tekton.dev/v1beta1
+kind: ClusterTask
+metadata:
+  name: package-config
+spec:
+  description: |-
+    A task that builds an imgpkg bundle from an image. Bundle contains a Knative service that references the image, and an images.yml.
+  params:
+    - name: workload_name
+      description: The name of the package
+      type: string
+    - name: image
+      description: The path to the image
+      type: string
+    - name: image_prefix
+      description: Image prefix
+      type: string
+    - name: registry_url
+      description: Registry url
+      type: string
+    - name: registry_username
+      description: registry username
+      type: string
+    - name: registry_password
+      description: Registry password
+      type: string
+  results:
+    - name: package
+      description: package yaml
+  steps:
+    - name: build-package
+      image: us.gcr.io/daisy-284300/nwebb/alm/carvel:latest
+      securityContext:
+        runAsUser: 0
+      workingDir: /root
+      script: |
+        #!/usr/bin/env bash
+
+        set -o errexit
+        set -o xtrace
+
+        MY_BUNDLE_DIR=/tmp/my-bundle
+
+        mkdir -p "${MY_BUNDLE_DIR}/.imgpkg"
+        mkdir -p "${MY_BUNDLE_DIR}/config"
+
+        set +x
+        docker login -u '$(params.registry_username)' --password-stdin '$(params.registry_url)' <<< '$(params.registry_password)'
+        set -x
+
+        # build config.yaml, contains the Knative Service with an image reference to $(image)
+        cat << EOF > "${MY_BUNDLE_DIR}/config/service.yaml"
+        ---
+        apiVersion: serving.knative.dev/v1
+        kind: Service
+        metadata:
+          name: $(params.workload_name)
+        spec:
+          template:
+            spec:
+              serviceAccountName: cartographer-example-registry-creds-sa
+              containers:
+                - name: workload
+                  image: $(params.image)
+                  securityContext:
+                    runAsUser: 1000
+        EOF
+
+        # kbld .imgpkg/images.yml from config.yaml
+        kbld -f "${MY_BUNDLE_DIR}/config" --imgpkg-lock-output "${MY_BUNDLE_DIR}/.imgpkg/images.yml"
+
+        BUNDLE="$(params.image_prefix)bundle"
+
+        # imgpkg bundle the whole thing
+        imgpkg push -b "${BUNDLE}" -f "${MY_BUNDLE_DIR}"
+
+        # generate a version for the package
+        package_id="$(date +%Y%m%d.%H%M.%S)"
+
+        # build package.yaml
+        cat > $(results.package.path) << EOF
+        ---
+        apiVersion: data.packaging.carvel.dev/v1alpha1
+        kind: Package
+        metadata:
+          name: $(params.workload_name).${package_id}
+        spec:
+          refName: $(params.workload_name)
+          version: ${package_id}
+          releaseNotes: |
+                Initial release of the simple app package
+          template:
+            spec:
+              fetch:
+              - imgpkgBundle:
+                  image: ${BUNDLE}
+              template:
+              - ytt:
+                  paths:
+                  - "config/"
+              - kbld:
+                  paths:
+                  - ".imgpkg/images.yml"
+                  - "-"
+              deploy:
+              - kapp: {}
+        EOF

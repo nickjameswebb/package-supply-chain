@@ -1,0 +1,38 @@
+#@ load("@ytt:data", "data")
+---
+apiVersion: carto.run/v1alpha1
+kind: ClusterConfigTemplate
+metadata:
+  name: package-config
+spec:
+  configPath: .status.outputs.package
+  params:
+    - name: image_prefix
+      default: some-default-prefix-
+  template:
+    apiVersion: carto.run/v1alpha1
+    kind: Runnable
+    metadata:
+      name: $(workload.metadata.name)$-package-config
+    spec:
+      serviceAccountName: #@ data.values.service_account_name
+      runTemplateRef:
+        name: package-taskrun
+      inputs:
+        serviceAccount: #@ data.values.service_account_name
+        taskRef:
+          kind: ClusterTask
+          name: package-config
+        params:
+          - name: workload_name
+            value: $(workload.metadata.name)$
+          - name: image
+            value: $(images.image.image)$
+          - name: image_prefix
+            value: $(params.image_prefix)$
+          - name: registry_url
+            value: #@ data.values.registry.server
+          - name: registry_username
+            value: #@ data.values.registry.username
+          - name: registry_password
+            value: #@ data.values.registry.password
