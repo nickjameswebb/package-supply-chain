@@ -68,7 +68,6 @@ cd /Users/nwebb/workspace/app-last-mile/cartographer-gitops && git pull && rm -r
 
 ## TODOs
 
-- Replace `values.yaml` with values schemas, add `values.yaml` to `.gitignore` (protect credentials)
 - Implement delivery chain
 - Include sha on imgpkg bundle for package
 - Figure out how to properly version `package.yaml`

@@ -12,10 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-#@data/values
+#@data/values-schema
 ---
-service_account_name: cartographer-gitwriter-sc-sa
-workload_name: foo.vmware.com
+service_account_name: ""
+workload_name: ""
 source_repo:
-  url: https://github.com/nickjameswebb/go-hello-world
-  branch: main
+  url: ""
+  branch: ""

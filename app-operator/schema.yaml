@@ -12,16 +12,16 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-#@data/values
+#@data/values-schema
 ---
-service_account_name: cartographer-gitwriter-sc-sa
-image_prefix: us.gcr.io/daisy-284300/nwebb/alm/cartographer/workloads-
+service_account_name: ""
+image_prefix: ""
 registry:
-  server: us.gcr.io
-  username: _json_key
-  password: <GCR KEY>
-git_repository: https://<GITHUB_USERNAME>:<GITHUB_PAT>@github.com/nickjameswebb/cartographer-gitops.git
-git_branch: main
-git_user_name: <GITHUB_USERNAME>
-git_user_email: <GITHUB_EMAIL>
-git_commit_message: "Update app configuration"
+  server: ""
+  username: ""
+  password: ""
+git_repository: ""
+git_branch: ""
+git_user_name: ""
+git_user_email: ""
+git_commit_message: ""

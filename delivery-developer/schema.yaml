@@ -12,9 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-#@data/values
+#@data/values-schema
 ---
 git_writer:
-  repository: https://github.com/nickjameswebb/cartographer-gitops
-  branch: main
-service_account_name: delivery-sa
+  repository: ""
+  branch: ""
+service_account_name: ""
