@@ -1,0 +1,22 @@
+---
+apiVersion: carto.run/v1alpha1
+kind: ClusterDeploymentTemplate
+metadata:
+  name: package-deployment-template
+spec:
+  observedCompletion:
+    succeeded:
+      key: '.status.conditions[?(@.type=="ReconcileSucceeded")].status'
+      value: 'True'
+    failed:
+      key: '.status.conditions[?(@.type=="ReconcileFailed")].status'
+      value: 'True'
+  template:
+    apiVersion: packaging.carvel.dev/v1alpha1
+    kind: PackageRepository
+    metadata:
+      name: $(deliverable.metadata.name)$
+    spec:
+      fetch:
+        http:
+          url: $(deployment.url)$

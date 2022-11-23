@@ -14,6 +14,7 @@
 
 #@data/values-schema
 ---
+deliverable_name: ""
 git_writer:
   repository: ""
   branch: ""

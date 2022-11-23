@@ -11,7 +11,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
 ---
 apiVersion: tekton.dev/v1beta1
 kind: ClusterTask
@@ -86,6 +85,9 @@ spec:
     - name: workload_name
       description: The name of the package
       type: string
+    - name: ref_name
+      description: The name of the package ref
+      type: string
     - name: image
       description: The path to the image
       type: string
@@ -135,7 +137,7 @@ spec:
         spec:
           template:
             spec:
-              serviceAccountName: cartographer-example-registry-creds-sa
+              serviceAccountName: delivery-sa
               containers:
                 - name: workload
                   image: $(params.image)
@@ -160,9 +162,9 @@ spec:
         apiVersion: data.packaging.carvel.dev/v1alpha1
         kind: Package
         metadata:
-          name: $(params.workload_name).${package_id}
+          name: $(params.ref_name).${package_id}
         spec:
-          refName: $(params.workload_name)
+          refName: $(params.ref_name)
           version: ${package_id}
           releaseNotes: |
                 Initial release of the simple app package

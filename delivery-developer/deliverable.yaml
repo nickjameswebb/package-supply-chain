@@ -17,7 +17,7 @@
 apiVersion: carto.run/v1alpha1
 kind: Deliverable
 metadata:
-  name: gitops
+  name: #@ data.values.deliverable_name
   namespace: delivery
   labels:
     app.tanzu.vmware.com/workload-type: deliver

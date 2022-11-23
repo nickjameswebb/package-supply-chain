@@ -32,3 +32,6 @@ spec:
     env:
       - name: CGO_ENABLED
         value: "0"
+  params:
+    - name: ref_name
+      value: #@ data.values.ref_name

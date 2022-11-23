@@ -16,6 +16,7 @@
 ---
 service_account_name: ""
 workload_name: ""
+ref_name: ""
 source_repo:
   url: ""
   branch: ""

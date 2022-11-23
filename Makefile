@@ -10,6 +10,7 @@ install-prereqs:
 	kapp deploy -a kpack -f https://github.com/pivotal/kpack/releases/download/v0.7.2/release-0.7.2.yaml -y
 	kapp deploy -a tekton -f https://storage.googleapis.com/tekton-releases/pipeline/previous/v0.30.0/release.yaml -y
 	flux install --namespace=flux-system --network-policy=false --components=source-controller
+	flux install --namespace=flux-system --network-policy=false --components=kustomize-controller
 	kapp deploy -a kc -f https://github.com/vmware-tanzu/carvel-kapp-controller/releases/latest/download/release.yml -y
 	kapp deploy -a knative-serving \
 		-f https://github.com/knative/serving/releases/download/knative-v1.8.0/serving-crds.yaml \
@@ -57,7 +58,7 @@ install-cluster-delivery:
 	kapp deploy -a package-supply-chain-delivery -f <(ytt --ignore-unknown-comments -f ./delivery -f ../values/delivery) -y
 
 .PHONY: uninstall-cluster-delivery
-uninstall-cluster-delivery:
+uninstall-cluster-delivery: uninstall-deliverable
 	kapp delete -a package-supply-chain-delivery -y
 
 .PHONY: install-deliverable

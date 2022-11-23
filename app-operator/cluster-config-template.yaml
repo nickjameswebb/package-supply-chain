@@ -9,6 +9,8 @@ spec:
   params:
     - name: image_prefix
       default: some-default-prefix-
+    - name: ref_name
+      default: example.example.com
   template:
     apiVersion: carto.run/v1alpha1
     kind: Runnable
@@ -26,6 +28,8 @@ spec:
         params:
           - name: workload_name
             value: $(workload.metadata.name)$
+          - name: ref_name
+            value: $(params.ref_name)$
           - name: image
             value: $(images.image.image)$
           - name: image_prefix

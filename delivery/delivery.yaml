@@ -19,20 +19,21 @@ metadata:
 spec:
   selector:
     app.tanzu.vmware.com/workload-type: deliver
-
-  #
-  #
-  #   source-provider <--[src]--   deployer
-  #     GitRepository               App
   resources:
     - name: source-provider
       templateRef:
         kind: ClusterSourceTemplate
         name: gitops-source
-
-    - name: deployer
+    - name: package-repo-deployer
       templateRef:
         kind: ClusterDeploymentTemplate
-        name: package-deploy
+        name: package-deployment-template
       deployment:
         resource: source-provider
+    - name: kustomize-deployer
+      templateRef:
+        kind: ClusterTemplate
+        name: kustomize-deployment
+      sources:
+        - name: gitops
+          resource: source-provider

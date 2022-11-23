@@ -28,7 +28,7 @@ make install-workload
 
 ### Delivery
 
-The delivery supply chain. Still WIP, may not work at all.
+The delivery supply chain.
 
 ```sh
 make install-cluster-delivery
@@ -36,7 +36,7 @@ make install-cluster-delivery
 
 ### Delivery Developer
 
-The deliverable. Still WIP, may not work at all.
+The deliverable.
 
 ```sh
 make install-deliverable
@@ -68,7 +68,7 @@ cd /Users/nwebb/workspace/app-last-mile/cartographer-gitops && git pull && rm -r
 
 ## TODOs
 
-- Implement delivery chain
 - Include sha on imgpkg bundle for package
 - Figure out how to properly version `package.yaml`
   - Current solution can give an error if there are leading zeros in any of the fields
+- Will repo strategy work with multiple repos on same cluster?
