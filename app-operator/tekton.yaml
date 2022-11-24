@@ -36,14 +36,13 @@ spec:
       description: User name
       type: string
       default: "Example"
-    - name: git_commit_message
-      description: Message for the git commit
-      type: string
-      default: "New Commit"
     - name: package_yaml
       type: string
       description: >
         yaml string containing package.yaml definition
+    - name: ref_name
+      description: The name of the package ref
+      type: string
   steps:
     - name: git-clone-and-push
       image: paketobuildpacks/build:base
@@ -65,13 +64,13 @@ spec:
         git config user.email $(params.git_user_email)
         git config user.name $(params.git_user_name)
 
-        mkdir -p packages && rm -rf packages/*
-        cd packages
+        mkdir -p packages/$(params.ref_name)
+        cd packages/$(params.ref_name)
 
         package_version="$(echo '$(params.package_yaml)' | grep version | awk '{print $2}')"
         echo '$(params.package_yaml)' > "${package_version}.yaml"
         git add "${package_version}.yaml"
-        git commit -m "$(params.git_commit_message)"
+        git commit -m "Add package $(params.ref_name).${package_version}"
         git push origin $(params.git_branch)
 ---
 apiVersion: tekton.dev/v1beta1
