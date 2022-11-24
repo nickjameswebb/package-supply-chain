@@ -74,9 +74,13 @@ uninstall-deliverable:
 .PHONY: uninstall
 uninstall: uninstall-deliverable uninstall-cluster-delivery uninstall-workload uninstall-supply-chain
 
-#### Docker Images ####
+#### Misc ####
 
 .PHONY: carvel-image
 carvel-image:
 	docker build . -t us.gcr.io/daisy-284300/nwebb/alm/carvel -f Dockerfile.carvel
 	docker push us.gcr.io/daisy-284300/nwebb/alm/carvel
+
+.PHONY: curl-pod
+curl-pod:
+	kubectl run mycurlpod --image=curlimages/curl --rm=true -i --tty -- sh
