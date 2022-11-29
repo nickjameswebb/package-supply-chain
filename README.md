@@ -69,8 +69,6 @@ cd /Users/nwebb/workspace/app-last-mile/cartographer-gitops && git pull && rm -r
 ## TODOs
 
 - Include sha on imgpkg bundle for package
-- Figure out how to properly version `package.yaml`
-  - Current solution can give an error if there are leading zeros in any of the fields
 - Will repo strategy work with multiple repos on same cluster?
 - How do I observe a supply chain?
   - I push a commit, unless I search specific CRDs there's no way to tell where in the supply chain the commit is
