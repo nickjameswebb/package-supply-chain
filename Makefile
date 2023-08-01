@@ -26,18 +26,19 @@ install-prereqs:
 .PHONY: uninstall-prereqs
 uninstall-prereqs:
 	kapp delete -a kc -y
-	flux uninstall --namespace=flux-system
+	flux uninstall --namespace=flux-system -s
 	kapp delete -a tekton -y
 	kapp delete -a kpack -y
 	kapp delete -a cartographer -y
-	k delete ns/cartographer
+	k delete ns/cartographer --ignore-not-found
 	kapp delete -a cert-manager -y
+	kapp delete -a knative-serving -y
 
 #### Supply Chain ####
 
 .PHONY: install-supply-chain
 install-supply-chain:
-	kapp deploy -a package-supply-chain-app-operator -f <(ytt --ignore-unknown-comments -f ./app-operator -f ../values/app-operator) -y
+	kapp deploy -a package-supply-chain-app-operator -f <(ytt --ignore-unknown-comments -f ./app-operator -f ../values/package-supply-chain/app-operator) -y
 
 .PHONY: uninstall-supply-chain
 uninstall-supply-chain: uninstall-workload
@@ -45,7 +46,7 @@ uninstall-supply-chain: uninstall-workload
 
 .PHONY: install-workload
 install-workload: install-supply-chain
-	kapp deploy -a package-supply-chain-developer -f <(ytt --ignore-unknown-comments -f ./developer -f ../values/developer) -y
+	kapp deploy -a package-supply-chain-developer -f <(ytt --ignore-unknown-comments -f ./developer -f ../values/package-supply-chain/developer) -y
 
 .PHONY: uninstall-workload
 uninstall-workload:
@@ -55,7 +56,7 @@ uninstall-workload:
 
 .PHONY: install-cluster-delivery
 install-cluster-delivery:
-	kapp deploy -a package-supply-chain-delivery -f <(ytt --ignore-unknown-comments -f ./delivery -f ../values/delivery) -y
+	kapp deploy -a package-supply-chain-delivery -f <(ytt --ignore-unknown-comments -f ./delivery -f ../values/package-supply-chain/delivery) -y
 
 .PHONY: uninstall-cluster-delivery
 uninstall-cluster-delivery: uninstall-deliverable
@@ -63,7 +64,7 @@ uninstall-cluster-delivery: uninstall-deliverable
 
 .PHONY: install-deliverable
 install-deliverable: install-cluster-delivery
-	kapp deploy -a package-supply-chain-delivery-developer -f <(ytt --ignore-unknown-comments -f ./delivery-developer -f ../values/delivery-developer) -y
+	kapp deploy -a package-supply-chain-delivery-developer -f <(ytt --ignore-unknown-comments -f ./delivery-developer -f ../values/package-supply-chain/delivery-developer) -y
 
 .PHONY: uninstall-deliverable
 uninstall-deliverable:
